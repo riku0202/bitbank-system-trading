@@ -10,6 +10,7 @@ import (
 type ConfigList struct {
 	ApiKey    string `json:"api_key"`
 	ApiSecret string `json:"api_secret"`
+	LogFile   string
 }
 
 var Config ConfigList
@@ -24,5 +25,6 @@ func init() {
 	Config = ConfigList{
 		ApiKey:    cfg.Section("bitbank").Key("api_key").String(),
 		ApiSecret: cfg.Section("bitbank").Key("api_secret").String(),
+		LogFile:   cfg.Section("goTrading").Key("log_file").String(),
 	}
 }
