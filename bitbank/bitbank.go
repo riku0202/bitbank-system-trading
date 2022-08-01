@@ -5,6 +5,8 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -12,7 +14,8 @@ import (
 	"time"
 )
 
-const baseUrl = "https://api.bitbank.cc"
+// const baseUrl = "https://api.bitbank.cc"
+const baseUrl = "https://public.bitbank.cc"
 
 type APIClient struct {
 	key        string
@@ -46,7 +49,6 @@ func (api APIClient) header(method, endpoint string, body []byte) map[string]str
 	}
 }
 
-// GETの場合: 「ACCESS-NONCE、リクエストのパス、クエリパラメータ」 を連結させたもの
 func (api *APIClient) doRequest(method, urlPath string, query map[string]string, data []byte) (body []byte, err error) {
 	baseUrl, err := url.Parse(baseUrl)
 	if err != nil {
@@ -87,4 +89,35 @@ func (api *APIClient) doRequest(method, urlPath string, query map[string]string,
 	}
 
 	return body, nil
+}
+
+type Ticker struct {
+	Success int `json:"success"`
+	Data    struct {
+		Sell      string `json:"sell"`
+		Buy       string `json:"buy"`
+		High      string `json:"high"`
+		Low       string `json:"low"`
+		Open      string `json:"open"`
+		Last      string `json:"last"`
+		Vol       string `json:"vol"`
+		Timestamp int    `json:"timestamp"`
+	} `json:"data"`
+}
+
+func (api *APIClient) GetTicker(pair string) (*Ticker, error) {
+	baseurl := "/%s/ticker"
+	url := fmt.Sprintf(baseurl, pair)
+
+	resp, err := api.doRequest("GET", url, map[string]string{}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var ticker Ticker
+	err = json.Unmarshal(resp, &ticker)
+	if err != nil {
+		return nil, err
+	}
+	return &ticker, nil
 }

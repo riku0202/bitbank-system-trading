@@ -9,6 +9,7 @@ import (
 
 func main() {
 	apiClient := bitbank.New(config.Config.ApiKey, config.Config.ApiSecret)
-	fmt.Println(apiClient.GetAssets())
+	result, _ := apiClient.GetTicker("btc_jpy")
+	fmt.Printf("(%%+v) %+v\n", result)
 
 }
